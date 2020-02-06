@@ -49,20 +49,6 @@ void closefiles(int n, ...) {   // uses varargs (variable # of args)
   va_end (pargs);   // clean up
 }
 
-
-void removeComment(char *c){
-       int a, b;
-
-       for(a=b=0; c[b] ;){
-              if(c[b]=='/' && c[b+1] == '/') {for(b= b+2; c[b] && c[b++]!= '\n';) ; }
-              else if (c[b] == '/' && c[b+1] == '*'){
-                     for(b=b+2; c[b] && c[++b] && (c[b-1]!='*' || c[b]!='/' || !b++); );
-              }
-              else {c[a++] = c[b++];}
-       }
-       c[a]='\0';
-}
-
 int main(int argc, const char * argv[]) {
   FILE* fin;
   FILE* fout;
@@ -114,6 +100,7 @@ int main(int argc, const char * argv[]) {
         printf ("NO SYNTAX ERROR\n");
   return 0;
 }
+
 
 int gline(char s[],int lim) {
   int i,c;
