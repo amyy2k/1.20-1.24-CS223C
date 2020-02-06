@@ -8,7 +8,7 @@
 
 #define MAX 80
 
-int gline(void);
+int gline(char line[],int lim);
 
 bool open_io_files(int argc, const char* argv[], FILE** fin, FILE** fout,
                    int min_expected_argc, int max_expected_argc,
@@ -63,7 +63,6 @@ void removeComment(char *c){
        c[a]='\0';
 }
 
-
 int main(int argc, const char * argv[]) {
   FILE* fin;
   FILE* fout;
@@ -76,10 +75,10 @@ int main(int argc, const char * argv[]) {
   int paren=0;
   char line[MAX];
 
-  while ((length = gline()) > 0 )
+  while ((length = gline(line, MAX)) > 0 )
     {
       n=0;
-      while(n < length {
+      while(n < length) {
 	  if( line[n] == '[') {
 	      brace++;
 	    }
@@ -116,17 +115,14 @@ int main(int argc, const char * argv[]) {
   return 0;
 }
 
-
-int gline(void)
- {
- int c, i;
- extern char line[];
- for (i = 0; i < (MAX - 1) && (c=getchar)) != EOF && c != '\n'; ++i)
- line[i] = c;
- if (c == '\n') {
- line[i] = c;
- ++i;
- }
- line[i] = '\0';
- return i;
- }
+int gline(char s[],int lim) {
+  int i,c;
+  for(i=0;i<lim-1 &&(c=getchar())!=EOF && c != '\n';++i)
+    s[i] = c;
+  if( c == '\n') {
+    s[i] = c;
+    ++i;
+  }
+  else { s[i] = '\0'; }
+  return i;
+}
