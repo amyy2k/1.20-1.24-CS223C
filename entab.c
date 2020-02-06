@@ -1,14 +1,12 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "files.h"
 #include <stdarg.h>
 #include <stdbool.h>
-#include "files.h"
 
-#define TAB_INTERVAL 10
+#define TAB_INTERVAL 8
 #define MAX_TAB_INTERVAL 80
-
 
 bool open_io_files(int argc, const char* argv[], FILE** fin, FILE** fout,
                    int min_expected_argc, int max_expected_argc,
@@ -38,7 +36,7 @@ bool open_io_files(int argc, const char* argv[], FILE** fin, FILE** fout,
   return true;
 }
 
-
+    // must include <stdarg.h>  -- see files.h
 void closefiles(int n, ...) {   // uses varargs (variable # of args)
   va_list pargs;
   va_start (pargs, n);    // initialize the list ptr
@@ -49,61 +47,39 @@ void closefiles(int n, ...) {   // uses varargs (variable # of args)
   va_end (pargs);   // clean up
 }
 
+int main(int argc, const char * argv[]) {
+  FILE* fin;
+  FILE* fout;
 
-int main(int argc, const char * argv[]){
+        // set tab_interval or use default
+  int tab_interval = argc == 4 ? atoi(argv[3]) : TAB_INTERVAL;
+  if (tab_interval > 80) {
+    fprintf(stderr, "tabstops must be <= 80 characters\n");
+    exit(2);
+  }
 
-FILE* fin;
-FILE* fout;
-             // set tab_interval or use default
-int tab_interval = argc == 4 ? atoi(argv[3]) : TAB_INTERVAL;
-if (tab_interval > 80) {
- fprintf(stderr, "tabstops must be <= 80 characters\n");
-  exit(2);
+       // open input and output files
+  if (!open_io_files(argc, argv, &fin, &fout, 3, 4,                   "Usage: ./entab inputfile outputfile tab_interval (optional)\n")) {
+    exit(1);
+  }
+
+  int c = 0;
+  int tab = 0;
+  int space = 0;
+  int counter = 0;
+
+  while((c = fgetc(fin)) != EOF){
+      if(c == ' '){
+        while((c=fgetc(fin)) !=EOF && c == ' ') {counter++;}
+        tab = counter / TAB_INTERVAL;
+        space = counter % TAB_INTERVAL;
+        while(tab-- > 0){fputc('\t', fout);}
+        while(space-- > 0){fputc(' ', fout);}
+            }
+      if (c != ' ') {fputc(c, fout);}
+      counter = 1;
 }
+  closefiles(2, fin, fout);  // must say number of files
 
-
-             // open input and output files
-if (!open_io_files(argc, argv, &fin, &fout, 3, 4,                   "Usage: ./detab inputfile outputfile tab_interval (optional)\n")) {
-        exit(1);
-       }
-
-
-int c;
-char maxspaces[MAX_TAB_INTERVAL + 1];
-char spaces[MAX_TAB_INTERVAL + 1];
-memset(maxspaces, ' ', sizeof(maxspaces));
-
-int bytes_written = 0;
-int b = 0;
-int t = 0;
-
-for (bytes_written = 1;(c = fgetc(fin)) != EOF; ++bytes_written) {
-  if (c == ' ') {
-        if(bytes_written % TAB_INTERVAL != 0) {++b;}
-       else {
-       b = 0;
-       ++t;
-         }
-  if (c != ' '){
-  for( ; t > 0 ; --t){
-  fputc('\t', fout);
-  if (c== '\t'){ b = 0;}
-  else {
-  for (; b > 0; --b){
-
-  fputc(' ', fout);
-  fputc(c, fout);
-
-  if(c == '\n') {bytes_written = 0;}
-
-  else if ( c=='\t') {bytes_written += (TAB_INTERVAL - (bytes_written -1) % TAB_INTERVAL) - 1;}
-       }
-   }
-  }
-  }
-
-}
-  }
-closefiles(2, fin, fout);
-return 0;
+  return 1;
 }
