@@ -68,12 +68,13 @@ int i = 0;
 int c = 0;
 char file[MAX];
 
-while((c = fgetc(fin))!=EOF && i < MAX){
+while((c = fgetc(fin))!=EOF){
 file[i] = fgetc(fin);
 ++i;
 }
 removeComment(file);
 fputs(file, fout);
+
 closefiles(2, fin, fout);
 return 0;
 }
